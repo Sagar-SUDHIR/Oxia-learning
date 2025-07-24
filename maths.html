@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mathematics - Oxia Learning</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+    body {
+      background: linear-gradient(135deg, #000000, #1a1a1a);
+      color: #fff;
+      padding: 30px;
+      overflow-x: hidden;
+    }
+    h2 {
+      text-align: center;
+      color: gold;
+      font-size: 2.2rem;
+      margin-bottom: 20px;
+      animation: fadeIn 1s ease;
+    }
+    .section {
+      margin-top: 30px;
+      animation: fadeInUp 1s ease;
+    }
+    .card {
+      background: rgba(255, 215, 0, 0.05);
+      border: 1px solid gold;
+      border-radius: 10px;
+      padding: 20px;
+      margin: 20px 0;
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
+      transition: transform 0.4s ease, box-shadow 0.4s ease;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 0 25px gold;
+    }
+    .card h3 {
+      color: gold;
+      font-size: 20px;
+    }
+    .card p {
+      margin-top: 5px;
+      color: #ddd;
+    }
+    .btn {
+      display: inline-block;
+      background: gold;
+      color: black;
+      padding: 10px 18px;
+      margin-top: 12px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn:hover {
+      background: #ffd700cc;
+      transform: scale(1.05);
+    }
+    .btn::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.3);
+      transform: skewX(-30deg);
+      transition: left 0.5s;
+    }
+    .btn:hover::before {
+      left: 100%;
+    }
+    iframe {
+      width: 100%;
+      height: 315px;
+      border: none;
+      border-radius: 10px;
+      margin-top: 10px;
+    }
+    #searchBar {
+      width: 100%;
+      padding: 14px;
+      font-size: 16px;
+      margin-top: 15px;
+      border-radius: 8px;
+      border: none;
+      background: #1e1e1e;
+      color: gold;
+      box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
+    }
+    .toggle-btn {
+      cursor: pointer;
+      color: gold;
+      background: none;
+      border: none;
+      font-size: 22px;
+      font-weight: bold;
+      margin-top: 10px;
+      display: block;
+      transition: transform 1s ease;
+    }
+    .toggle-btn:hover {
+      transform: scale(1.1);
+    }
+    @keyframes fadeInUp {
+      0% {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+<h2>📘 Mathematics - Oxia Learning</h2>
+<input type="text" id="searchBar" placeholder="🔍 Search chapter or topic...">
+
+<div class="section" class="carqb">
+  <button class="toggle-btn" onclick="togglePDFs()">📄 Question Banks ▼</button>
+  <div id="pdfList" style="display: none;">Loading PDFs...</div>
+</div>
+
+<div class="section" class="vid" id="videoSection">
+  <h3>🎬 Videos</h3>
+  <div id="videoList">Loading Videos...</div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDULiS4xdboxwglhjS2K9s9o6pRrwfI0eo",
+    authDomain: "oxialearning-566b1.firebaseapp.com",
+    projectId: "oxialearning-566b1",
+    storageBucket: "oxialearning-566b1.appspot.com",
+    messagingSenderId: "444072750130",
+    appId: "1:444072750130:web:53f04dbf47f069e43f602b"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const auth = getAuth(app);
+
+  const pdfList = document.getElementById("pdfList");
+  const videoList = document.getElementById("videoList");
+  const searchBar = document.getElementById("searchBar");
+  let allPDFs = [];
+
+  function renderPDFs(dataList) {
+    pdfList.innerHTML = "";
+    if (dataList.length === 0) {
+      pdfList.innerHTML = "<p>No PDFs found.</p>";
+      return;
+    }
+    dataList.forEach((data, index) => {
+      setTimeout(() => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+          <h3>${data.title}</h3>
+          <p>${data.description}</p>
+          <a class="btn" href="${data.link}" target="_blank">View PDF</a>
+        `;
+        pdfList.appendChild(card);
+      }, index * 100);
+    });
+  }
+
+  searchBar.addEventListener("input", () => {
+    const keyword = searchBar.value.toLowerCase();
+    const filtered = allPDFs.filter(item =>
+      item.title.toLowerCase().includes(keyword) ||
+      item.description.toLowerCase().includes(keyword)
+    );
+    renderPDFs(filtered);
+  });
+
+  window.togglePDFs = () => {
+    const section = document.getElementById("pdfList");
+    const btn = document.querySelector(".toggle-btn");
+    if (section.style.display === "none") {
+      section.style.display = "block";
+      btn.innerHTML = "📄 Question Banks ▲";
+    } else {
+      section.style.display = "none";
+      btn.innerHTML = "📄 Question Banks ▼";
+    }
+  };
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      pdfList.innerHTML = "<p>Please log in to view content.</p>";
+      videoList.innerHTML = "";
+      return;
+    }
+
+    // 🔧 TEMP: hardcoded batch for testing
+    const batch = "10th";
+
+    const pdfQuery = query(collection(db, "resources"), where("batch", "==", batch), where("subject", "==", "Mathematics"));
+    const videoQuery = query(collection(db, "videos"), where("batch", "==", batch), where("subject", "==", "Mathematics"));
+
+    const pdfSnap = await getDocs(pdfQuery);
+    allPDFs = [];
+    pdfSnap.forEach(doc => allPDFs.push(doc.data()));
+    renderPDFs(allPDFs);
+
+    const videoSnap = await getDocs(videoQuery);
+    videoList.innerHTML = "";
+    videoSnap.forEach(doc => {
+      const data = doc.data();
+      const videoId = data.videoUrl.split("v=")[1]?.split("&")[0] || "";
+      const embedLink = `https://www.youtube.com/embed/${videoId}`;
+      videoList.innerHTML += `
+        <div class="card">
+          <h3>${data.title}</h3>
+          <p>${data.description}</p>
+          <iframe src="${embedLink}" allowfullscreen></iframe>
+        </div>
+      `;
+    });
+    if (videoSnap.empty) videoList.innerHTML = "<p>No videos uploaded.</p>";
+  });
+</script>
+
+</body>
+</html>

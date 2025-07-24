@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Oxia Learning - Account</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* Custom styles for account page */
+
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: #0a0f1c;
+      color: white;
+      overflow: hidden;
+    }
+
+    .container {
+      width: 360px;
+      margin: 100px auto;
+      padding: 40px;
+      background: rgba(20, 30, 50, 0.95);
+      border-radius: 16px;
+      box-shadow: 0 0 30px rgba(255, 204, 102, 0.2);
+      position: relative;
+      z-index: 1;
+    }
+
+    .container h2 {
+      text-align: center;
+      color: #ffcc66;
+    }
+
+    .form-group {
+      margin: 20px 0;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      margin-top: 10px;
+      background: #1f2b3e;
+      color: white;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      background-color: #ffcc66;
+      color: black;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 20px;
+      transition: all 0.3s ease;
+    }
+
+    button:hover {
+      box-shadow: 0 0 20px #ffcc66;
+    }
+
+    .toggle-btn {
+      background: none;
+      border: none;
+      color: #aaa;
+      text-decoration: underline;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+
+    #particles-js {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+    }
+
+    .form {
+      display: none;
+    }
+
+    .form.active {
+      display: block;
+    }
+
+    .note {
+      text-align: center;
+      margin-top: 10px;
+      color: #999;
+    }
+  </style>
+</head>
+<body>
+
+<div id="particles-js"></div>
+
+<div class="container">
+  <h2 id="form-title">Sign In</h2>
+
+  <!-- Sign In Form -->
+  <div class="form active" id="signin-form">
+    <div class="form-group">
+      <input type="email" id="signin-email" placeholder="Email" />
+    </div>
+    <div class="form-group">
+      <input type="password" id="signin-password" placeholder="Password" />
+    </div>
+    <button onclick="signIn()">Sign In</button>
+    <button class="toggle-btn" onclick="toggleForm('signup')">Don't have an account? Sign Up</button>
+  </div>
+
+  <!-- Sign Up Form -->
+  <div class="form" id="signup-form">
+    <div class="form-group">
+      <input type="email" id="signup-email" placeholder="Email" />
+    </div>
+    <div class="form-group">
+      <input type="password" id="signup-password" placeholder="Password" />
+    </div>
+    <button onclick="signUp()">Sign Up</button>
+    <button class="toggle-btn" onclick="toggleForm('signin')">Already have an account? Sign In</button>
+  </div>
+
+  <p class="note">Your data is safe with us</p>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDULiS4xdboxwglhjS2K9s9o6pRrwfI0eo",
+  authDomain: "oxialearning-566b1.firebaseapp.com",
+  projectId: "oxialearning-566b1",
+  storageBucket: "oxialearning-566b1.firebasestorage.app",
+  messagingSenderId: "444072750130",
+  appId: "1:444072750130:web:53f04dbf47f069e43f602b",
+  measurementId: "G-GWT0Q7QZZJ"
+};
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  // ✅ Sign In
+  window.signIn = async function () {
+    const email = document.getElementById("signin-email").value;
+    const password = document.getElementById("signin-password").value;
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      // ✅ Redirect immediately after sign in
+      window.location.href = "user.html";
+    } catch (error) {
+      alert("Error: " + error.message);
+    }
+  };
+
+  // ✅ Sign Up
+  window.signUp = async function () {
+    const email = document.getElementById("signup-email").value;
+    const password = document.getElementById("signup-password").value;
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const uid = userCredential.user.uid;
+      await setDoc(doc(db, "users", uid), {
+        email: email,
+        class: ""
+      });
+      alert("Account created! You can now sign in.");
+      toggleForm('signin');
+    } catch (error) {
+      alert("Error: " + error.message);
+    }
+  };
+
+  // ✅ Toggle form logic
+  window.toggleForm = function (form) {
+    document.getElementById("signin-form").classList.remove("active");
+    document.getElementById("signup-form").classList.remove("active");
+    document.getElementById("form-title").textContent = form === "signin" ? "Sign In" : "Sign Up";
+    document.getElementById(`${form}-form`).classList.add("active");
+  };
+</script>
+<!-- Particles.js -->
+<script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+<script>
+  particlesJS("particles-js", {
+    "particles": {
+      "number": { "value": 60 },
+      "color": { "value": "#ffcc66" },
+      "shape": { "type": "circle" },
+      "opacity": { "value": 0.5 },
+      "size": { "value": 4 },
+      "line_linked": {
+        "enable": true,
+        "distance": 120,
+        "color": "#ffcc66",
+        "opacity": 0.4,
+        "width": 1
+      },
+      "move": {
+        "enable": true,
+        "speed": 2
+      }
+    },
+    "interactivity": {
+      "events": {
+        "onhover": { "enable": true, "mode": "repulse" },
+        "onclick": { "enable": true, "mode": "push" }
+      }
+    },
+    "retina_detect": true
+  });
+</script>
+  
+</body>
+</html>

@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>User Management – Oxia Admin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      background: #0d0d0d;
+      color: white;
+    }
+
+    nav {
+      background: #111;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid gold;
+    }
+
+    .logo {
+      font-size: 1.4rem;
+      color: gold;
+      font-weight: bold;
+    }
+
+    .nav-links a {
+      color: #ccc;
+      margin-left: 1.5rem;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    .nav-links a:hover {
+      color: gold;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: auto;
+      padding: 2rem;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .controls input, .controls select {
+      padding: 0.6rem;
+      border-radius: 8px;
+      border: none;
+      width: 48%;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #1a1a1a;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 1rem;
+      border-bottom: 1px solid #333;
+    }
+
+    th {
+      background: #222;
+      color: gold;
+    }
+
+    tr:hover {
+      background-color: #2a2a2a;
+    }
+
+    .delete-btn {
+      background: red;
+      color: white;
+      padding: 0.4rem 0.8rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .delete-btn:hover {
+      background: darkred;
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Oxia Admin</div>
+  <div class="nav-links">
+    <a href="admin.html">Dashboard</a>
+    <a href="batchorders.html">Batch Orders</a>
+    <a href="username.html">Users</a>
+    <a href="index.html">Logout</a>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="controls">
+    <input type="text" id="searchUser" placeholder="Search by name, email, or phone">
+    <select id="sortOption">
+      <option value="az">Sort: A–Z</option>
+      <option value="batch">Sort by Batch</option>
+    </select>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Name/Email</th>
+        <th>Role</th>
+        <th>Batch</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody id="userTable"></tbody>
+  </table>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getFirestore, collection, getDocs, deleteDoc, doc
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import {
+  getAuth, onAuthStateChanged, deleteUser
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDULiS4xdboxwglhjS2K9s9o6pRrwfI0eo",
+  authDomain: "oxialearning-566b1.firebaseapp.com",
+  projectId: "oxialearning-566b1",
+  storageBucket: "oxialearning-566b1.firebasestorage.app",
+  messagingSenderId: "444072750130",
+  appId: "1:444072750130:web:53f04dbf47f069e43f602b",
+  measurementId: "G-GWT0Q7QZZJ"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth();
+
+const table = document.getElementById("userTable");
+let usersData = [];
+
+async function loadUsers() {
+  const snap = await getDocs(collection(db, "users"));
+  usersData = snap.docs.map(docSnap => ({
+    id: docSnap.id,
+    ...docSnap.data()
+  }));
+  renderTable(usersData);
+}
+
+function renderTable(data) {
+  table.innerHTML = "";
+  data.forEach(user => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${user.email}</td>
+      <td>${user.role || 'student'}</td>
+      <td>${user.class || 'N/A'}</td>
+      <td><button class="delete-btn" data-id="${user.id}">Remove</button></td>
+    `;
+    table.appendChild(row);
+  });
+}
+
+document.getElementById("searchUser").addEventListener("input", (e) => {
+  const keyword = e.target.value.toLowerCase();
+  const filtered = usersData.filter(user =>
+    user.email.toLowerCase().includes(keyword) ||
+    (user.name && user.name.toLowerCase().includes(keyword)) ||
+    (user.phoneNumber && user.phoneNumber.includes(keyword))
+  );
+  renderTable(filtered);
+});
+
+document.getElementById("sortOption").addEventListener("change", (e) => {
+  const value = e.target.value;
+  let sorted = [...usersData];
+  if (value === "az") {
+    sorted.sort((a, b) => a.email.localeCompare(b.email));
+  } else if (value === "batch") {
+    sorted.sort((a, b) => (a.class || '').localeCompare(b.class || ''));
+  }
+  renderTable(sorted);
+});
+
+document.addEventListener("click", async (e) => {
+  if (e.target.classList.contains("delete-btn")) {
+    const id = e.target.dataset.id;
+    if (confirm("Are you sure you want to remove this user from the system?")) {
+      await deleteDoc(doc(db, "users", id));
+      alert("User removed.");
+      loadUsers();
+    }
+  }
+});
+
+onAuthStateChanged(auth, user => {
+  if (!user) {
+    window.location.href = "account.html";
+  } else {
+    loadUsers();
+  }
+});
+</script>
+
+</body>
+</html>

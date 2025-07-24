@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Oxia Learning - Student</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0; padding: 0; box-sizing: border-box;
+    }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(to right, #0a0a0a, #1a1a1a);
+      color: white;
+    }
+    nav {
+      background: #111;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 20px;
+      flex-wrap: wrap;
+      position: relative;
+    }
+    .nav-links {
+      display: flex;
+      gap: 20px;
+      position: relative;
+    }
+    .nav-links a {
+      color: white;
+      text-decoration: none;
+      font-weight: 500;
+      position: relative;
+      padding: 5px;
+    }
+    .underline {
+      position: absolute;
+      height: 2px;
+      background: gold;
+      bottom: 0;
+      transition: all 1s ease;
+    }
+    .hamburger {
+      display: none;
+      font-size: 28px;
+      color: gold;
+      cursor: pointer;
+    }
+    @media (max-width: 768px) {
+      .nav-links {
+        display: none;
+        flex-direction: column;
+        width: 100%;
+      }
+      .nav-links.active {
+        display: flex;
+      }
+      .hamburger {
+        display: block;
+      }
+    }
+    .about-section {
+      padding: 40px 20px;
+      text-align: center;
+    }
+    .about-section h2 {
+      color: gold;
+      margin-bottom: 20px;
+    }
+    .about-section p {
+      max-width: 800px;
+      margin: 0 auto 10px;
+      line-height: 1.6;
+    }
+    /* Chatbot Button */
+    .chat-icon {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: gold;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 28px;
+      color: #000;
+      cursor: pointer;
+      box-shadow: 0 0 15px gold;
+    }
+    .chat-window {
+      display: none;
+      position: fixed;
+      bottom: 100px;
+      right: 30px;
+      background: #1a1a1a;
+      border: 1px solid gold;
+      border-radius: 10px;
+      padding: 20px;
+      width: 250px;
+      z-index: 999;
+    }
+    .chat-window a {
+      display: block;
+      margin-bottom: 10px;
+      text-decoration: none;
+      color: gold;
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="hamburger" onclick="toggleMenu()">☰</div>
+    <div class="nav-links" id="navLinks">
+      <a href="maths.html" onmouseover="moveUnderline(this)">Mathematics</a>
+      <a href="chemistry.html" onmouseover="moveUnderline(this)">Chemistry</a>
+      <a href="biology.html" onmouseover="moveUnderline(this)">Biology</a>
+      <a href="physics.html" onmouseover="moveUnderline(this)">Physics</a>
+      <a href="social.html" onmouseover="moveUnderline(this)">Social</a>
+      <a href="index.html" onmouseover="moveUnderline(this)">Back to HOME</a>
+      <div class="underline" id="underline"></div>
+    </div>
+  </nav>
+
+  <section class="about-section">
+    <h2>Why Oxia Learning?</h2>
+    <p>Oxia Learning is your ultimate companion for excelling in Board Exams and Competitive Exams like NEET and JEE.</p>
+    <p>We provide:</p>
+    <p>✅ 5600+ practice questions curated by experts</p>
+    <p>✅ Chapter-wise resources for 10th, 11th, 12th</p>
+    <p>✅ Regular updates and smart study tools</p>
+    <p>✅ Focused material for Boards + Entrance prep</p>
+  </section>
+
+  <div class="chat-icon" onclick="toggleChat()">💬</div>
+
+  <div class="chat-window" id="chatWindow">
+    <a href="mailto:msgabhinavak@gmail.com">✉️ Report a Course Problem</a>
+    <a href="rate.html">🌟 Rate Us</a>
+    <a href="bot.html">🤖 Solve My Problems</a>
+  </div>
+
+  <script>
+    const underline = document.getElementById('underline');
+    const links = document.querySelectorAll('.nav-links a');
+
+    function moveUnderline(el) {
+      underline.style.width = el.offsetWidth + 'px';
+      underline.style.left = el.offsetLeft + 'px';
+    }
+
+    function toggleMenu() {
+      document.getElementById('navLinks').classList.toggle('active');
+    }
+
+    function toggleChat() {
+      const chat = document.getElementById('chatWindow');
+      chat.style.display = chat.style.display === 'block' ? 'none' : 'block';
+    }
+
+    // Set default underline position
+    window.onload = () => {
+      if (links.length > 0) moveUnderline(links[0]);
+    };
+  </script>
+
+</body>
+</html>

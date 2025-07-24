@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Rate Us - Oxia Learning</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      background: #0f0f0f;
+      color: #fff;
+      font-family: 'Segoe UI', sans-serif;
+      padding: 30px;
+      text-align: center;
+    }
+    h1 {
+      color: gold;
+    }
+    .stars {
+      font-size: 2rem;
+      margin: 20px 0;
+    }
+    .fa-star {
+      cursor: pointer;
+      color: gray;
+      transition: color 0.3s;
+    }
+    .fa-star.checked {
+      color: gold;
+    }
+    textarea {
+      width: 90%;
+      max-width: 500px;
+      height: 100px;
+      margin-top: 10px;
+      padding: 10px;
+      font-size: 1rem;
+      border-radius: 10px;
+      border: none;
+      outline: none;
+    }
+    input {
+      margin-top: 10px;
+      padding: 10px;
+      width: 90%;
+      max-width: 400px;
+      font-size: 1rem;
+      border-radius: 10px;
+      border: none;
+      outline: none;
+    }
+    #submitBtn {
+      margin-top: 20px;
+      padding: 12px 30px;
+      font-size: 1rem;
+      background: crimson;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    #submitBtn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 15px gold;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Rate Oxia Learning</h1>
+  
+  <div class="stars" id="stars">
+    <!-- 5 stars with half support -->
+  </div>
+
+  <textarea id="desc" placeholder="Write your feedback..."></textarea><br>
+  <input type="email" id="email" placeholder="Your Email" required><br>
+  <button id="submitBtn">Submit</button>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+  <script>
+    // Initialize Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyDULiS4xdboxwglhjS2K9s9o6pRrwfI0eo",
+      authDomain: "oxialearning-566b1.firebaseapp.com",
+      projectId: "oxialearning-566b1",
+      storageBucket: "oxialearning-566b1.appspot.com",
+      messagingSenderId: "444072750130",
+      appId: "1:444072750130:web:53f04dbf47f069e43f602b"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // Star rating logic
+    const starsContainer = document.getElementById("stars");
+    let rating = 0;
+
+    for (let i = 1; i <= 10; i++) {
+      const star = document.createElement("i");
+      star.classList.add("fa-star", "fa");
+      star.setAttribute("data-value", i / 2);
+      star.addEventListener("mouseover", highlightStars);
+      star.addEventListener("click", selectRating);
+      starsContainer.appendChild(star);
+    }
+
+    function highlightStars(e) {
+      const val = parseFloat(e.target.getAttribute("data-value"));
+      updateStars(val);
+    }
+
+    function selectRating(e) {
+      rating = parseFloat(e.target.getAttribute("data-value"));
+      updateStars(rating);
+    }
+
+    function updateStars(val) {
+      const stars = document.querySelectorAll(".fa-star");
+      stars.forEach(star => {
+        const starVal = parseFloat(star.getAttribute("data-value"));
+        star.classList.toggle("checked", starVal <= val);
+      });
+    }
+
+    document.getElementById("submitBtn").addEventListener("click", async () => {
+      const desc = document.getElementById("desc").value.trim();
+      const email = document.getElementById("email").value.trim();
+
+      if (!rating || !desc || !email) {
+        alert("Please fill all fields and select a rating.");
+        return;
+      }
+
+      try {
+        await db.collection("ratings").add({
+          rating: rating,
+          description: desc,
+          email: email,
+          timestamp: new Date()
+        });
+        alert("Thanks for your feedback!");
+        window.location.href = "index.html";
+      } catch (err) {
+        console.error("Error saving rating:", err);
+        alert("Failed to submit rating. Please try again.");
+      }
+    });
+  </script>
+
+</body>
+</html>

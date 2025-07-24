@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin Upload - Oxia Learning (Free Plan)</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #0d0d0d;
+      color: white;
+      padding: 30px;
+    }
+    h2 {
+      text-align: center;
+      color: gold;
+    }
+    .form-container {
+      max-width: 600px;
+      margin: auto;
+      background: #1a1a1a;
+      padding: 25px;
+      border-radius: 10px;
+      border: 1px solid gold;
+      box-shadow: 0 0 10px gold;
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+      color: gold;
+    }
+    select, input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 5px;
+      border: none;
+      font-size: 16px;
+    }
+    button {
+      margin-top: 20px;
+      width: 100%;
+      padding: 12px;
+      background: gold;
+      color: black;
+      border: none;
+      font-size: 18px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    #msg {
+      text-align: center;
+      margin-top: 20px;
+      color: gold;
+    }
+  </style>
+</head>
+<body>
+
+<h2>📎 Admin Upload (Paste Links Only)</h2>
+
+<div class="form-container">
+  <label for="batch">Select Batch</label>
+  <select id="batch">
+    <option value="10th">10th</option>
+    <option value="11th">11th</option>
+    <option value="12th">12th</option>
+  </select>
+
+  <label for="subject">Select Subject</label>
+  <select id="subject">
+    <option value="Mathematics">Mathematics</option>
+    <option value="Chemistry">Chemistry</option>
+    <option value="Physics">Physics</option>
+    <option value="Biology">Biology</option>
+    <option value="Social">Social</option>
+  </select>
+
+  <label for="type">Resource Type</label>
+  <select id="type">
+    <option value="pdf">Question Bank (PDF)</option>
+    <option value="video">Video (YouTube)</option>
+  </select>
+
+  <label>Title</label>
+  <input type="text" id="title" placeholder="Enter Title" />
+
+  <label>Description</label>
+  <textarea id="description" rows="3" placeholder="Enter Description..."></textarea>
+
+  <label>Paste PDF or YouTube Link</label>
+  <input type="text" id="link" placeholder="https://drive.google.com/... or https://youtube.com/..." />
+
+  <button onclick="upload()">Upload Resource</button>
+  <div id="msg"></div>
+</div>
+
+<!-- Firebase Script -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDULiS4xdboxwglhjS2K9s9o6pRrwfI0eo",
+    authDomain: "oxialearning-566b1.firebaseapp.com",
+    projectId: "oxialearning-566b1",
+    storageBucket: "oxialearning-566b1.appspot.com",
+    messagingSenderId: "444072750130",
+    appId: "1:444072750130:web:53f04dbf47f069e43f602b"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  const batchSelect = document.getElementById("batch");
+  const subjectSelect = document.getElementById("subject");
+  const typeSelect = document.getElementById("type");
+  const titleInput = document.getElementById("title");
+  const descInput = document.getElementById("description");
+  const linkInput = document.getElementById("link");
+  const msgDiv = document.getElementById("msg");
+
+  // Hide "Social" if not 10th
+  batchSelect.addEventListener("change", () => {
+    const socialOption = Array.from(subjectSelect.options).find(opt => opt.value === "Social");
+    if (batchSelect.value === "10th") {
+      socialOption.style.display = "block";
+    } else {
+      if (subjectSelect.value === "Social") subjectSelect.value = "Mathematics";
+      socialOption.style.display = "none";
+    }
+  });
+
+  // 🔧 FIXED: Make upload() global so HTML button can access it
+  window.upload = async function upload() {
+    const batch = batchSelect.value;
+    const subject = subjectSelect.value;
+    const type = typeSelect.value;
+    const title = titleInput.value.trim();
+    const description = descInput.value.trim();
+    const link = linkInput.value.trim();
+
+    if (!title || !description || !link) {
+      msgDiv.innerText = "⚠️ Please fill all fields.";
+      return;
+    }
+
+    if (!link.startsWith("http")) {
+      msgDiv.innerText = "⚠️ Please enter a valid link.";
+      return;
+    }
+
+    msgDiv.innerText = "⏳ Uploading...";
+
+    try {
+      if (type === "pdf") {
+        await addDoc(collection(db, "resources"), {
+          batch,
+          subject,
+          title,
+          description,
+          link
+        });
+        msgDiv.innerText = "✅ PDF link saved!";
+      } else {
+        await addDoc(collection(db, "videos"), {
+          batch,
+          subject,
+          title,
+          description,
+          videoUrl: link
+        });
+        msgDiv.innerText = "✅ Video link saved!";
+      }
+
+      // Clear form
+      titleInput.value = "";
+      descInput.value = "";
+      linkInput.value = "";
+    } catch (error) {
+      console.error("Upload error:", error);
+      msgDiv.innerText = "❌ Upload failed. Check console.";
+    }
+  };
+</script>
+
+</body>
+</html>

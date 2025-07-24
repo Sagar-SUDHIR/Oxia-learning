@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Panel - Oxia Learning</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      font-family: 'Poppins', sans-serif;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: linear-gradient(to right, #0f0c29, #302b63, #24243e);
+      color: white;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .auth-popup {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.9);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+    }
+
+    .auth-box {
+      background: #1e1e2f;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 0 25px #00ffcc;
+      text-align: center;
+    }
+
+    .auth-box input {
+      padding: 12px;
+      width: 100%;
+      margin-top: 15px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+    }
+
+    .auth-box button {
+      margin-top: 20px;
+      padding: 10px 30px;
+      background: #00ffcc;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    header {
+      padding: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255,255,255,0.05);
+      border-bottom: 1px solid #444;
+    }
+
+    header h1 {
+      font-size: 26px;
+      font-weight: 600;
+      color: #00ffcc;
+    }
+
+    .nav-btns button {
+      margin-left: 15px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 12px;
+      background: #111;
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .nav-btns button:hover {
+      background: #00ffcc;
+      color: black;
+      transform: scale(1.05);
+      box-shadow: 0 0 10px #00ffcc;
+    }
+
+    .cards-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 25px;
+      padding: 40px 20px;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid #00ffcc55;
+      padding: 30px;
+      border-radius: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 15px transparent;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 0 25px #00ffcc;
+      background: rgba(255,255,255,0.08);
+    }
+
+    .card h3 {
+      margin-bottom: 10px;
+      color: #00ffcc;
+    }
+
+    .summary {
+      background: rgba(255,255,255,0.03);
+      margin: 20px;
+      padding: 20px;
+      border-radius: 15px;
+      border: 1px solid #00ffcc33;
+    }
+
+    .summary h2 {
+      color: #00ffcc;
+      margin-bottom: 10px;
+    }
+
+    .summary p {
+      margin: 6px 0;
+    }
+
+    @media (max-width: 600px) {
+      header h1 {
+        font-size: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Password Auth -->
+  <div class="auth-popup" id="authPopup">
+    <div class="auth-box">
+      <h2>Enter Admin Password</h2>
+      <input type="password" id="adminPass" placeholder="Password" />
+      <button onclick="checkPassword()">Enter</button>
+    </div>
+  </div>
+
+  <header>
+    <h1>🛠️ Oxia Admin Dashboard</h1>
+    <div class="nav-btns">
+      <button onclick="window.location.href='index.html'">🏠 Home</button>
+      <button onclick="logout()">🔐 Logout</button>
+      <button onclick="viewAsStudent()">👁️ View as Student</button>
+    </div>
+  </header>
+
+  <section class="cards-container">
+    <div class="card" onclick="location.href='adminresources.html'">
+      <h3>📂 Admin Resources</h3>
+      <p>Edit internal content & upload</p>
+    </div>
+    <div class="card" onclick="location.href='batchorders.html'">
+      <h3>📦 Batch Orders</h3>
+      <p>View and manage all batch orders</p>
+    </div>
+    <div class="card" onclick="location.href='username.html'">
+      <h3>👤 User Info</h3>
+      <p>Search user roles and batches</p>
+    </div>
+    <div class="card" onclick="location.href='admin.html'">
+      <h3>⬆️ Upload Files</h3>
+      <p>Upload study materials, videos</p>
+    </div>
+    <div class="card" onclick="location.href='rate.html'">
+      <h3>⭐ Ratings</h3>
+      <p>User feedback and batch ratings</p>
+    </div>
+  </section>
+
+  <section class="summary">
+    <h2>📊 User Summary</h2>
+    <p><strong>Total Users:</strong> <span id="totalUsers">Loading...</span></p>
+    <p><strong>Orders Placed:</strong> <span id="orderedUsers">...</span></p>
+    <p><strong>Revenue Generated:</strong> ₹<span id="totalRevenue">...</span></p>
+    <p><strong>Top Spender:</strong> <span id="topSpender">...</span></p>
+  </section>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+  <script>
+    // Firebase Config
+    const firebaseConfig = {
+      apiKey: "AIzaSyDULiS4xdboxwglhjS2K9s9o6pRrwfI0eo",
+      authDomain: "oxialearning-566b1.firebaseapp.com",
+      projectId: "oxialearning-566b1",
+      storageBucket: "oxialearning-566b1.appspot.com",
+      messagingSenderId: "444072750130",
+      appId: "1:444072750130:web:53f04dbf47f069e43f602b"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    // Auto-skip password if already verified
+    // Only protect this page: admin.html
+window.onload = () => {
+  const isVerified = sessionStorage.getItem('adminAccess');
+  if (isVerified === 'true') {
+    document.getElementById('authPopup').style.display = 'none';
+  }
+};
+
+// Check password
+function checkPassword() {
+  const entered = document.getElementById('adminPass').value;
+  if (entered === 'OL0011') {
+    sessionStorage.setItem('adminAccess', 'true');
+    document.getElementById('authPopup').style.display = 'none';
+  } else {
+    alert('Incorrect Password');
+  }
+}
+
+// Logout clears admin access
+function logout() {
+  sessionStorage.removeItem('adminAccess');
+  auth.signOut().then(() => {
+    window.location.href = 'account.html';
+  });
+}    // Logout
+    function logout() {
+      localStorage.removeItem('adminVerified');
+      auth.signOut().then(() => {
+        window.location.href = 'account.html';
+      });
+    }
+
+    // View as student (guest)
+    function viewAsStudent() {
+      auth.signInWithEmailAndPassword("msgabhinavak@gmail.com", "OxiaView2025")
+        .then(() => window.location.href = "user.html")
+        .catch(err => alert("Login failed: " + err.message));
+    }
+
+    // Fetch summary
+    async function loadSummary() {
+      const usersSnap = await db.collection('users').get();
+      const ordersSnap = await db.collection('orders').get();
+
+      let revenue = 0;
+      let topSpender = { name: '', email: '', total: 0 };
+      let userSpend = {};
+
+      ordersSnap.forEach(doc => {
+        const data = doc.data();
+        if (data.amount) {
+          revenue += data.amount;
+
+          if (!userSpend[data.email]) userSpend[data.email] = { total: 0, name: data.name || '', phone: data.phone || '' };
+          userSpend[data.email].total += data.amount;
+        }
+      });
+
+      for (let email in userSpend) {
+        if (userSpend[email].total > topSpender.total) {
+          topSpender = { ...userSpend[email], email };
+        }
+      }
+
+      document.getElementById("totalUsers").textContent = usersSnap.size;
+      document.getElementById("orderedUsers").textContent = ordersSnap.size;
+      document.getElementById("totalRevenue").textContent = revenue;
+      document.getElementById("topSpender").textContent = `${topSpender.name} (${topSpender.email}, ₹${topSpender.total})`;
+    }
+
+    loadSummary();
+  </script>
+</body>
+</html>

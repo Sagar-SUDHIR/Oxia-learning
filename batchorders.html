@@ -1,0 +1,307 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Batch Orders – Admin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: #0d0d0d;
+      color: white;
+    }nav {
+  background: #111;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid gold;
+}
+
+.logo {
+  font-size: 1.4rem;
+  color: gold;
+  font-weight: bold;
+}
+
+.nav-links a {
+  color: #ccc;
+  margin-left: 1.5rem;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.nav-links a:hover {
+  color: gold;
+}
+
+.container {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: auto;
+}
+
+.stats {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.card {
+  flex: 1;
+  background: #1a1a1a;
+  border: 2px solid gold;
+  border-radius: 10px;
+  padding: 1.5rem;
+  text-align: center;
+  box-shadow: 0 0 10px gold;
+}
+
+.search-bar {
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.search-bar input {
+  width: 50%;
+  padding: 0.6rem;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 1rem;
+  border-bottom: 1px solid #333;
+  text-align: left;
+}
+
+th {
+  color: gold;
+}
+
+tr:hover {
+  background-color: #1f1f1f;
+}
+
+.enroll-btn, .remove-btn {
+  background: gold;
+  color: black;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.remove-btn {
+  background: #b80000;
+  color: white;
+  margin-left: 8px;
+}
+
+.enroll-btn:hover {
+  background: #e6c200;
+}
+
+.remove-btn:hover {
+  background: #990000;
+}
+
+  </style>
+</head>
+<body><nav>
+  <div class="logo">Oxia Admin</div>
+  <div class="nav-links">
+    <a href="admin.html">Dashboard</a>
+    <a href="batchorders.html">Batch Orders</a>
+    <a href="index.html">Logout</a>
+  </div>
+</nav><div class="container">
+  <div class="stats">
+    <div class="card">
+      <h2>Total Orders</h2>
+      <p id="totalOrders">0</p>
+    </div>
+    <div class="card">
+      <h2>Total Revenue</h2>
+      <p id="totalRevenue">₹0</p>
+    </div>
+  </div>  <div class="search-bar">
+    <input type="text" id="searchInput" placeholder="Search by name, email, or phone...">
+  </div>  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Phone</th>
+        <th>Batch</th>
+        <th>Status</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody id="orderTable"></tbody>
+  </table>
+</div><script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getFirestore, collection, getDocs, doc, updateDoc, query, where
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import {
+  getAuth, onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDULiS4xdboxwglhjS2K9s9o6pRrwfI0eo",
+  authDomain: "oxialearning-566b1.firebaseapp.com",
+  projectId: "oxialearning-566b1",
+  storageBucket: "oxialearning-566b1.firebasestorage.app",
+  messagingSenderId: "444072750130",
+  appId: "1:444072750130:web:53f04dbf47f069e43f602b"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth();
+
+const table = document.getElementById("orderTable");
+const totalOrdersElem = document.getElementById("totalOrders");
+const totalRevenueElem = document.getElementById("totalRevenue");
+
+let allOrders = [];
+
+async function loadOrders() {
+  const snap = await getDocs(collection(db, "courseOrders"));
+  let totalRevenue = 0;
+  allOrders = [];
+
+  snap.forEach(docSnap => {
+    const data = docSnap.data();
+    data.id = docSnap.id;
+    allOrders.push(data);
+    if (data.status === "pending" || data.status === "approved") {
+      totalRevenue += 399;
+    }
+  });
+
+  totalOrdersElem.textContent = allOrders.length;
+  totalRevenueElem.textContent = `₹${totalRevenue}`;
+  renderTable(allOrders);
+}
+
+function renderTable(data) {
+  table.innerHTML = "";
+  data.forEach(order => {
+    const row = document.createElement("tr");
+    let actionHTML = "";
+
+    if (order.status === "approved") {
+      actionHTML = `
+        ✅ Approved
+        <button class="remove-btn" data-email="${order.email}" data-id="${order.id}">🗑️ Remove</button>
+      `;
+    } else if (order.status === "removed") {
+      actionHTML = `❌ Access Removed`;
+    } else {
+      actionHTML = `<button class="enroll-btn" data-email="${order.email}" data-grade="${order.grade}" data-id="${order.id}">Enroll</button>`;
+    }
+
+    row.innerHTML = `
+      <td>${order.studentName}</td>
+      <td>${order.email}</td>
+      <td>${order.phoneNumber}</td>
+      <td>${order.grade}</td>
+      <td>${order.status}</td>
+      <td>${actionHTML}</td>
+    `;
+    table.appendChild(row);
+  });
+}
+
+const enrollUser = async (email, grade, orderId) => {
+  try {
+    const userSnap = await getDocs(query(collection(db, "users"), where("email", "==", email)));
+    if (userSnap.empty) {
+      alert("User not found.");
+      return;
+    }
+
+    const userDoc = userSnap.docs[0];
+    await updateDoc(doc(db, "users", userDoc.id), {
+      class: grade.split(" ")[0]
+    });
+
+    await updateDoc(doc(db, "courseOrders", orderId), {
+      status: "approved"
+    });
+
+    alert("✅ User enrolled successfully.");
+    loadOrders();
+  } catch (err) {
+    console.error("Enrollment error:", err);
+    alert("Something went wrong while enrolling the user.");
+  }
+};
+
+const removeAccess = async (email, orderId) => {
+  try {
+    const userSnap = await getDocs(query(collection(db, "users"), where("email", "==", email)));
+    if (!userSnap.empty) {
+      const userDoc = userSnap.docs[0];
+      await updateDoc(doc(db, "users", userDoc.id), {
+        class: ""
+      });
+    }
+
+    await updateDoc(doc(db, "courseOrders", orderId), {
+      status: "removed"
+    });
+
+    alert("🚫 Access removed successfully.");
+    loadOrders();
+  } catch (err) {
+    console.error("Remove access error:", err);
+    alert("Something went wrong while removing access.");
+  }
+};
+
+// Handle button clicks
+
+document.addEventListener("click", async (e) => {
+  if (e.target.classList.contains("enroll-btn")) {
+    const email = e.target.dataset.email;
+    const grade = e.target.dataset.grade;
+    const orderId = e.target.dataset.id;
+    await enrollUser(email, grade, orderId);
+  }
+  if (e.target.classList.contains("remove-btn")) {
+    const email = e.target.dataset.email;
+    const orderId = e.target.dataset.id;
+    await removeAccess(email, orderId);
+  }
+});
+
+document.getElementById("searchInput").addEventListener("input", (e) => {
+  const keyword = e.target.value.toLowerCase();
+  const filtered = allOrders.filter(order =>
+    order.email.toLowerCase().includes(keyword) ||
+    order.studentName.toLowerCase().includes(keyword) ||
+    order.phoneNumber.includes(keyword)
+  );
+  renderTable(filtered);
+});
+
+onAuthStateChanged(auth, user => {
+  if (!user) {
+    window.location.href = "account.html";
+  } else {
+    loadOrders();
+  }
+});
+</script></body>
+</html>

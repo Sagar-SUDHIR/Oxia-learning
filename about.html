@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About - Oxia Learning</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #0f0f0f;
+      color: white;
+    }
+
+    .about-section {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 60px 40px;
+      flex-wrap: wrap;
+      background: #1a1a1a;
+    }
+
+    .about-left {
+      flex: 1;
+      min-width: 300px;
+      max-width: 600px;
+      padding-right: 20px;
+    }
+
+    .about-left h2 {
+      font-size: 36px;
+      color: #ffcc66;
+      margin-bottom: 20px;
+    }
+
+    .about-left p {
+      font-size: 17px;
+      color: #ccc;
+      line-height: 1.6;
+      margin-bottom: 15px;
+    }
+
+    .about-right {
+      flex: 1;
+      text-align: center;
+      min-width: 300px;
+    }
+
+    .about-right img {
+      width: 100%;
+      max-width: 450px;
+      border-radius: 16px;
+      box-shadow: 0 0 25px rgba(255, 204, 102, 0.2);
+      transition: transform 0.3s;
+    }
+
+    .about-right img:hover {
+      transform: scale(1.03);
+    }
+
+    .social-links {
+      margin-top: 25px;
+    }
+
+    .social-btn {
+      display: inline-block;
+      margin-right: 10px;
+      margin-bottom: 10px;
+      padding: 10px 18px;
+      border-radius: 30px;
+      text-decoration: none;
+      font-weight: bold;
+      transition: all 0.3s;
+    }
+
+    .social-btn.yt {
+      background: #ff0000;
+      color: white;
+    }
+
+    .social-btn.insta {
+      background: #c13584;
+      color: white;
+    }
+
+    .social-btn.wa {
+      background: #25d366;
+      color: white;
+    }
+
+    .social-btn:hover {
+      box-shadow: 0 0 12px gold;
+      transform: scale(1.05);
+    }
+
+    .about-footer {
+      background: #111;
+      padding: 20px;
+      text-align: center;
+      color: #888;
+      font-size: 15px;
+      margin-top: 40px;
+    }
+
+    .about-footer a {
+      color: gold;
+      text-decoration: none;
+    }
+
+    .about-footer a:hover {
+      text-decoration: underline;
+    }
+
+    @media screen and (max-width: 768px) {
+      .about-section {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .about-left {
+        padding-right: 0;
+      }
+
+      .about-right {
+        margin-top: 30px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <section class="about-section">
+    <div class="about-left">
+      <h2>About Oxia Learning</h2>
+      <p>
+        Welcome to <strong>Oxia Learning</strong> – an online learning platform built
+        to empower students from Classes 10, 11, and 12 with high-quality,
+        exam-focused education. Our platform is designed for flexibility,
+        accessibility, and results.
+      </p>
+      <p>
+        Learn anytime, anywhere with our expert-curated questions, instant
+        doubt solution, and personalized support. Whether you are preparing for
+        boards or competitive exams, Oxia has your back.
+      </p>
+      <div class="social-links">
+        <a href="https://www.youtube.com/@itsAbhinavAK" target="_blank" class="social-btn yt">YouTube</a>
+        <a href="https://www.instagram.com/oxialearning" target="_blank" class="social-btn insta">Instagram</a>
+          <a href="https://wa.me/919778540407" target="_blank" class="social-btn wa">WhatsApp</a> </div>
+    </div>
+
+    <div class="about-right">
+      <h1>Abhinav AK</h1>
+      <img src="ak.svg" alt="Oxia Online Learning" />
+    </div>
+  </section>
+
+  <footer class="about-footer">
+    <p>Website designed and developed by <a href="https://sagar-sudhir.github.io/main-web/" target="_blank">SagarVS</a></p>
+  </footer>
+
+</body>
+</html>
